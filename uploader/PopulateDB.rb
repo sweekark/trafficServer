@@ -8,11 +8,14 @@ class PopulateDB
   end
 
   def pushData(data)
+    ########### sample data to test
     string = '{"trafficInfo" : [ { "junctionId" : "9:7:1","location":{"long":"93","lat":"45"},"timestamp":45125125412},{ "junctionId" : "92:7:1","location":{"long":"93","lat":"45"},"timestamp":45125125412} ] }'
+    ##################################
     parsed = JSON.parse(string) # returns a hash
     array_of_hashes = []
     parsed["trafficInfo"].each do |trafficInfo|
-      newPost = {:junctionId => trafficInfo["junctionId"],
+      newPost = {
+        :junctionId => trafficInfo["junctionId"],
         :location => trafficInfo["location"],
         :timestamp => trafficInfo["timestamp"],
         :update => 0
