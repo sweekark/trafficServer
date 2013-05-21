@@ -1,4 +1,4 @@
-orequire 'rubygems'
+require 'rubygems'
 require 'mongo'
 require 'json'
 include Mongo
