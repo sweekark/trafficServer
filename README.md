@@ -1,10 +1,8 @@
-trafficServer
+Ruby-mongodb-udp
 =============
 
-server code for traffic analyser
+Ruby udp server 
 
-The code is divided into 4 parts
-uploader 
-normalizer and
-renderer - ror web services
-ui - html r extjs4 
+Ruby mongo db connection
+
+crud functinality examples
