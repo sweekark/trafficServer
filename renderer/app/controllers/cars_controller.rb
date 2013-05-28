@@ -2,11 +2,24 @@ class CarsController < ApplicationController
   # GET /cars
   # GET /cars.xml
   def index
-    @cars = Car.all
+    @normalizer = Normalizer.all(:from => params[:from],:to=>params[:to])
+    @nmalizer = Normalizer.all(
+      :"from1.junction.loc" => 
+      {
+        "$near" => [12.92967, 77.62168]
+      },
+       :"to1.junction.loc" => 
+      {
+        "$near" => [12.92967, 77.62168]
+      }
 
+    ).first
+
+    Rails.logger.debug("My object: #{params[:points]}")
+    Rails.logger.debug("My object: #{@normalizers.inspect}")
     respond_to do |format|
       format.html # index.html.erb
-      format.xml  { render :xml => @cars }
+      format.xml  { render :xml => @normalizer  }
     end
   end
 

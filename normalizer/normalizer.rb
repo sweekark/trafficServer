@@ -6,7 +6,8 @@ include Mongo
 @client = MongoClient.new('localhost', 27017)
 @db     = @client['traffic']
 @coll   = @db['uploader']
-@normalizer = @db['normalizer']
+@normalizer = @db['normalizers']
+@junction = @db['junctions']
 @normalizer.remove
 
 
@@ -19,21 +20,27 @@ include Mongo
 def normalizer(startPoint,endPoint)
   timeDiff = endPoint["timestamp"] - startPoint["timestamp"]
   @timeTakenCount = 0
-  @timeTakenLatest = 5
+  @timeTakenLatest = 0
   if ( @normalizerEntry = @normalizer.find_one( 
-                                               {:from=>startPoint["junctionId"],:to => endPoint["junctionId"]}
-                                              ) ) then
-                                              puts @normalizerEntry
-                                              @timeTakenArray = @normalizerEntry["timeTaken"]
-                                              @timeTakenCount =  @normalizerEntry["timeTaken"].count
-                                              @timeTakenLatest =  @normalizerEntry["latest"]
+                                               {
+    :"from.junction.id"=>startPoint["junctionId"],
+    :"to.junction.id" => endPoint["junctionId"]
+  } ) 
+     ) then
+     puts @normalizerEntry
+     @timeTakenArray = @normalizerEntry["timeTaken"]
+     @timeTakenCount =  @normalizerEntry["timeTaken"].count
+     @timeTakenLatest =  @normalizerEntry["latest"]
+  puts " in check cond time taken count is #{@timeTakenCount}"
   end
   ## if the entry for the uvid is not present in normalizer create new
   ## if present just push the value to the array 
   ## upsert => true option will handle this
-  if @timeTakenCount < 5 then 
+  #calculateNextBuffer()
+  puts "time taken count is #{@timeTakenCount}"
+  if @timeTakenCount < 2 then 
     @normalizer.update(
-      {:from=>startPoint["junctionId"],:to => endPoint["junctionId"]},
+      {:"from.junction"=>@junction.find_one(id:startPoint["junctionId"]),:"to.junction" => @junction.find_one(:id=>endPoint["junctionId"])},
       {
       "$push" => {:timeTaken =>  {:value => timeDiff,:timestamp => endPoint["timestamp"] }  
     },"$set" => {:latest =>@timeTakenLatest}},
@@ -41,12 +48,15 @@ def normalizer(startPoint,endPoint)
       :upsert => true
     })
   else
+    puts "in else #{@timeTakenLatest}"
+    @timeTakenUpdate = (@timeTakenLatest + 1)%2
     @normalizer.update(
-      {:from=>startPoint["junctionId"],:to => endPoint["junctionId"]},
+      {:"from.junction.id"=>startPoint["junctionId"],:"to.junction.id" => endPoint["junctionId"]},
       {"$set" => 
         {"timeTaken.#{@timeTakenLatest}" =>  {:value => timeDiff,:timestamp => endPoint["timestamp"] },
-          "latest" => @timeTakenLatest}}
+          "latest" => @timeTakenUpdate }}
     )
+    puts "in else update #{@timeTakenUpdate}"
 
   end
 end
@@ -58,7 +68,7 @@ count = 0
 @coll.find({"update"=>0}).each { 
   |endPoint|
   puts count 
-  if count == 6 
+  if count == 12
     exit
   end
   ## on each of these endpoints get the previous entry for the same uvid 

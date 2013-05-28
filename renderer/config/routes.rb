@@ -1,4 +1,7 @@
 Mongo::Application.routes.draw do
+  resources :noramlizers
+
+
   resources :cars
   
   # The priority is based upon order of creation:
