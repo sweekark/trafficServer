@@ -9,27 +9,56 @@
 ######################################################
 class PopulateNormalizer
 
+  def calculateAvgTime(startPoint,endPoint)
+    avgTimeTaken = 0
+
+    if ( normalizerEntry = @normalizer.find_one(@findOneQuery) 
+       ) then
+       timeTakenArray = normalizerEntry["timeTaken"]
+       timeTakenCount =  normalizerEntry["timeTaken"].count
+       puts timeTakenArray
+       timeTakenArray.each do |timeTaken| 
+         avgTimeTaken = avgTimeTaken + timeTaken["value"]
+       end
+    end
+    avgTimeTaken = avgTimeTaken/timeTakenCount
+    puts "avgTimeTaken for points between is #{avgTimeTaken}"
+    @normalizer.update(
+      @findOneQuery,
+      {"$set" => {"avgTimeTaken"=>avgTimeTaken}
+    }
+    )
+  end
+
   def updateTimeTaken(startPoint,endPoint,lastIndex,timeDiff)
-     presentIndex = (@lastIndex + 1)% @timeTakenMax
-      puts " updating time taken on index #{presentIndex}"
-      @normalizerE = @normalizer.update(
-        {:"from.junction.id"=>startPoint["junctionId"],:"to.junction.id" => endPoint["junctionId"]},
-        {"$set" => 
-          {"timeTaken.#{presentIndex}" =>  {:value => timeDiff,:timestamp => endPoint["timestamp"] },
-            "presentIndex" => presentIndex }}
-      )
+    presentIndex = (@lastIndex + 1)% @timeTakenMax
+    puts " updating time taken on index #{presentIndex}"
+    @normalizerE = @normalizer.update(
+      @findOneQuery,
+      {"$set" => 
+        {"timeTaken.#{presentIndex}" =>  
+        @timeTakenQuery,
+            "presentIndex" => presentIndex 
+        }
+    }
+    )
+    calculateAvgTime(startPoint,endPoint)
   end
 
   def CreateNew(startPoint,endPoint,lastIndex,timeDiff)
-     presentIndex = (@lastIndex + 1)% @timeTakenMax
+    presentIndex = (@lastIndex + 1)% @timeTakenMax
+      puts " pushing new entry for time taken at index #{presentIndex}"
     @normalizer.update(
-      {:"from.junction"=>@junction.find_one(id:startPoint["junctionId"]),:"to.junction" => @junction.find_one(:id=>endPoint["junctionId"])},
+      {:"from.junction"=>@junction.find_one(id:startPoint["junctionId"]),
+        :"to.junction" => @junction.find_one(:id=>endPoint["junctionId"])},
       {
-      "$push" => {:timeTaken =>  {:value => timeDiff,:timestamp => endPoint["timestamp"] }  
+      "$push" => {:timeTaken =>  
+        @timeTakenQuery
     },"$set" => {:presentIndex => presentIndex}},
       {
       :upsert => true
     })
+    calculateAvgTime(startPoint,endPoint)
   end
 
   def initialize(startPoint,endPoint,timeDiff)
@@ -38,7 +67,15 @@ class PopulateNormalizer
     @coll   = @db['uploader']
     @normalizer = @db['normalizers']
     @junction = @db['junctions']
-#@normalizer.remove
+    @findOneQuery = {
+      :"from.junction.id"=>startPoint["junctionId"],
+      :"to.junction.id" => endPoint["junctionId"]
+    }
+    @timeTakenQuery = 
+          {:value => timeDiff,
+            :timestamp => endPoint["timestamp"] 
+          }
+    #@normalizer.remove
 
 
     ## control the no of time taken entried in the bucket
@@ -46,11 +83,7 @@ class PopulateNormalizer
     @timeTakenMax = 3
     @timeTakenCount = 0
     @lastIndex = -1 # when no entry present for the start n end point
-    if ( @normalizerEntry = @normalizer.find_one( 
-                                                 {
-      :"from.junction.id"=>startPoint["junctionId"],
-      :"to.junction.id" => endPoint["junctionId"]
-    } ) 
+    if ( @normalizerEntry = @normalizer.find_one(@findOneQuery) 
        ) then
        @timeTakenArray = @normalizerEntry["timeTaken"]
        @timeTakenCount =  @normalizerEntry["timeTaken"].count
@@ -58,16 +91,16 @@ class PopulateNormalizer
        puts " entry exists for start point #{startPoint["junctionId"]} endpoint #{endPoint["junctionId"]} in nomralizer"
        puts "time taken count is #{@timeTakenCount}"
     end
-    ## if the entry for the uvid is not present in normalizer create new
+    ## if the entry for the uvid is not present 
+    ## in normalizer create new
     ## if present just push the value to the array 
     ## upsert => true option will handle this
-    #calculateNextBuffer()
+    #  calculateNextBuffer()
     if @timeTakenCount < @timeTakenMax then 
       CreateNew(startPoint,endPoint,@lastIndex,timeDiff)
-      puts " pushing new entry for time taken at index #{@timeTakenCount}"
     else
       updateTimeTaken(startPoint,endPoint,@lastIndex,timeDiff)
-           puts "##########################################################"
+      puts "##########################################################"
     end
   end
 end

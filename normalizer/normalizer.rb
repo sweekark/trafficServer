@@ -21,7 +21,8 @@ count = 0
   if count == 12
     exit
   end
-  ## on each of these endpoints get the previous entry for the same uvid 
+  ## on each of these endpoints get the previous 
+  ## entry for the same uvid 
   ## this will be the start point
   startPoint = @coll.find_one(
     {"uvid" => endPoint["uvid"],
@@ -37,5 +38,3 @@ count = 0
   end
   count = count +1
 }
-
-
