@@ -1,6 +1,8 @@
 Mongo::Application.routes.draw do
-  resources :noramlizers
 
+  match 'normalizer' => 'normalizers#index',
+    :via => :post , 
+    :defaults => { :format => 'json' }
 
   resources :cars
   

@@ -5,9 +5,33 @@ class Normalizer
   end
   one :junction
 
-  key :from, String, :required => true
-  key :to, String, :required => true
-  def self.test
-    return Normalizer.all()
+  def self.get(params)
+    @data = params[:data]
+    @from = @data[:from] 
+    @to = @data[:to] 
+    Rails.logger.debug("from : #{@from}")
+    Rails.logger.debug("to : #{@to}")
+    ## max distance is specified in radians
+    ## one radian begin 111.12 kms
+    ## a polypoint should be within 500 mtrs of a junction 
+    maxDistanceForJunction =  0.5/111.12
+    maxDistanceQuery =  "$maxDistance" => maxDistanceForJunction
+    normalizer = Normalizer.where(
+      :"from.junction.loc" => 
+      {
+        "$near" => [
+                    @from[:loc][:lon], @from[:loc][:lat]
+                  ],
+                  maxDistanceQuery
+      },
+        :"to.junction.loc" => 
+      {
+        "$near" => [
+                  @to[:loc][:lon], @to[:loc][:lat]
+                  ],
+                  maxDistanceQuery
+      }
+    ).fields(:from,:to,:avgTimeTaken).first
+    return normalizer
   end
 end
