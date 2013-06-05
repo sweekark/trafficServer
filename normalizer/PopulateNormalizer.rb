@@ -20,7 +20,6 @@ class PopulateNormalizer
        timeTakenArray.each do |timeTaken| 
          avgTimeTaken = avgTimeTaken + timeTaken["value"]
        end
-    end
     avgTimeTaken = avgTimeTaken/timeTakenCount
     puts "avgTimeTaken for points between is #{avgTimeTaken}"
     @normalizer.update(
@@ -28,6 +27,7 @@ class PopulateNormalizer
       {"$set" => {"avgTimeTaken"=>avgTimeTaken}
     }
     )
+    end
   end
 
   def updateTimeTaken(startPoint,endPoint,lastIndex,timeDiff)
