@@ -17,7 +17,7 @@ class UDPServer
     while true
       puts "listening at port #{@port}"
       data,sender = @socket.recvfrom(1024)
-      puts data
+      puts "data received : #{@data}"
       populate = PopulateDB.new()
       populate.pushData(data)
     end
