@@ -13,7 +13,7 @@ class UDPServer
       exit
 =end
     @socket = UDPSocket.new
-    @socket.bind(nil, @port) # is nil OK here?
+    @socket.bind('', @port) # is nil OK here?
     while true
       puts "listening at port #{@port}"
       data,sender = @socket.recvfrom(1024)
