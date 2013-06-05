@@ -36,5 +36,6 @@ count = 0
     timeDiff = endPoint["timestamp"] - startPoint["timestamp"]
     PopulateNormalizer.new( startPoint,endPoint,timeDiff)
   end
+
   count = count +1
 }
