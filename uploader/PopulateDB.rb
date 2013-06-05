@@ -26,7 +26,7 @@ class PopulateDB
     @client = MongoClient.new('localhost', 27017)
     @db     = @client['traffic']
     @coll   = @db['uploader']
-@coll.remove
+    #@coll.remove
 
     @coll.insert(array_of_hashes)
   end
