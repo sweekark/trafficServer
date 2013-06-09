@@ -15,21 +15,21 @@ class Normalizer
     ## one radian begin 111.12 kms
     ## a polypoint should be within 500 mtrs of a junction 
     maxDistanceForJunction =  0.5/111.12
-    maxDistanceQuery =  "$maxDistance" => maxDistanceForJunction
+    maxDistanceQuery =  "$maxDistance => #{maxDistanceForJunction}"
     normalizer = Normalizer.where(
       :"from.junction.loc" => 
       {
         "$near" => [
                     @from[:loc][:lon], @from[:loc][:lat]
                   ],
-                  maxDistanceQuery
+                 # maxDistanceQuery
       },
         :"to.junction.loc" => 
       {
         "$near" => [
                   @to[:loc][:lon], @to[:loc][:lat]
                   ],
-                  maxDistanceQuery
+                  #maxDistanceQuery
       }
     ).fields(:from,:to,:avgTimeTaken).first
     return normalizer
