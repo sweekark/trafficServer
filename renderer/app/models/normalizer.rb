@@ -21,14 +21,14 @@ class Normalizer
         "$near" => [
                     @from[:loc][:lon], @from[:loc][:lat]
                   ],
-                "$maxDistance" => $maxDistanceForJunction 
+                "$maxDistance" => maxDistanceForJunction 
       },
         :"to.junction.loc" => 
       {
         "$near" => [
                   @to[:loc][:lon], @to[:loc][:lat]
                   ],
-                "$maxDistance" => $maxDistanceForJunction 
+                "$maxDistance" => maxDistanceForJunction 
       }
     ).fields(:from,:to,:avgTimeTaken).first
     return normalizer
