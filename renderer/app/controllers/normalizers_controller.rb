@@ -3,11 +3,12 @@ class NormalizersController < ApplicationController
   # returns the avg time between two location sent in 
   # long lat format
   def index
-    @normalizers = Normalizer.get(params)
-
+    @results = Normalizer.getJunctions(params); 
+    Rails.logger.debug("results : #{@results}")
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: @normalizers }
+      #format.json { render json: @results }
+      format.json { render json: @results }
     end
   end
 
