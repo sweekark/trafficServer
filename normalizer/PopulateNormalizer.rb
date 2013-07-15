@@ -10,6 +10,7 @@
 class PopulateNormalizer
 
   def calculateAvgTime(startPoint,endPoint)
+puts "calculating avg time"
     avgTimeTaken = 0
 
     if ( normalizerEntry = @normalizer.find_one(@findOneQuery) 
@@ -31,6 +32,7 @@ class PopulateNormalizer
   end
 
   def updateTimeTaken(startPoint,endPoint,lastIndex,timeDiff)
+	puts " updating time taken ################"
     presentIndex = (@lastIndex + 1)% @timeTakenMax
     puts " updating time taken on index #{presentIndex}"
     @normalizerE = @normalizer.update(
@@ -63,7 +65,7 @@ class PopulateNormalizer
 
   def initialize(startPoint,endPoint,timeDiff)
     @client = MongoClient.new('localhost', 27017)
-    @db     = @client['traffic']
+    @db     = @client['traffic2']
     @coll   = @db['uploader']
     @normalizer = @db['normalizers']
     @junction = @db['junctions']
@@ -80,7 +82,7 @@ class PopulateNormalizer
 
     ## control the no of time taken entried in the bucket
     ## this will be the latest entries
-    @timeTakenMax = 3
+    @timeTakenMax = 10
     @timeTakenCount = 0
     @lastIndex = -1 # when no entry present for the start n end point
     if ( @normalizerEntry = @normalizer.find_one(@findOneQuery) 
@@ -97,6 +99,8 @@ class PopulateNormalizer
     ## upsert => true option will handle this
     #  calculateNextBuffer()
     if @timeTakenCount < @timeTakenMax then 
+      puts "##########################################################"
+	puts " creating new entry for junctions  #{startPoint["junctionId"]} endpoint #{endPoint["junctionId"]} in nomralizer "
       CreateNew(startPoint,endPoint,@lastIndex,timeDiff)
     else
       updateTimeTaken(startPoint,endPoint,@lastIndex,timeDiff)
