@@ -21,7 +21,7 @@ class PopulateDB
       array_of_hashes << newPost
     end
     @client = MongoClient.new('localhost', 27017)
-    @db     = @client['traffic']
+    @db     = @client['traffic2']
     @coll   = @db['uploader']
     #@coll.remove
 
