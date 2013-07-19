@@ -10,6 +10,10 @@ class PopulateDB
   def pushData(data)
     parsed = JSON.parse(data) # returns a hash
     array_of_hashes = []
+    unless parsed["trafficInfo"].kind_of?(Array)
+      puts "data not in proper format traffic info should be an array"
+      return
+      end
     parsed["trafficInfo"].each do |trafficInfo|
       newPost = {
         :junctionId => trafficInfo["junctionid"],

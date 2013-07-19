@@ -12,6 +12,7 @@ class UDPClient
     while true
       puts "sending packet to #{@host} port #{@port}"
       data = '{ "tag": "general", "agency": "free to air", "trafficInfo":[{"timestamp":1371282904,"junctionid":"91:560078:1", "location":{ "lat":"12.911335", "long":"77.585705"},"uvid":"54:9B:12:09:B4:C9"}]}'
+      data = '{ "tag": "general", "agency": "free to air"}'
 
       @socket.send(data, 0, @host, @port)
       sleep 2
