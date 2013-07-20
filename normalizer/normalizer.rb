@@ -12,6 +12,7 @@ require_relative 'PopulateNormalizer'
 
 
 ## get the latest endpoints from uploader
+puts "*************************************************************************"
 puts "new entries updated into uploader  #{@coll.count()}"
 count = 0
 
@@ -33,12 +34,20 @@ count = 0
   if startPoint  then
     puts "##########################################################"
     puts "for uvid #{ endPoint["uvId"]}"
-    puts "start point exits for end point #{endPoint["junctionId"]} in uploader db"
-    puts "setting update to 1 for start point #{startPoint["junctionId"]} "
+    puts "start point #{startPoint["junctionId"]}"
+    puts "end point #{endPoint["junctionId"]}"
+    puts "setting update to 1 "
     @coll.update({"_id" => startPoint["_id"]},{"$set"=>{"update"=>1}})
+    @coll.update({"_id" => endPoint["_id"]},{"$set"=>{"update"=>1}})
     timeDiff = endPoint["timestamp"] - startPoint["timestamp"]
+    puts " time taken is #{timeDiff}"
+	if timeDiff > 3600 then
+		puts "time Diff greater than 3600 hence dropping the packet"
+else
     PopulateNormalizer.new( startPoint,endPoint,timeDiff)
+end
   end
 
   count = count +1
 }
+puts "*************************************************************************"
