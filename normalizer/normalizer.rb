@@ -13,11 +13,14 @@ require_relative 'PopulateNormalizer'
 
 ## get the latest endpoints from uploader
 puts "*************************************************************************"
-puts "new entries updated into uploader  #{@coll.count()}"
+puts "#{Time.new.inspect} " 
 count = 0
-
-@coll.find({"update"=>0}).each { 
+dataForTimeStamp = (Time.now.getutc - 600).to_i # get end point from the last 10 mins 
+# the normalizer cron is running for every 5 mins hence a buffer of 5 mins in case we miss something
+puts "checking in uploader db for data from #{dataForTimeStamp}"
+@coll.find({"update"=>0,"timestamp" => {"$gt"=> dataForTimeStamp}}).each { 
   |endPoint|
+puts count
   if count == 700
 #    exit
   end
