@@ -35,6 +35,7 @@ puts count
       "timestamp"=> {"$lt" => endPoint["timestamp"]},
   },
 :sort => ['timestamp', Mongo::DESCENDING]
+#sort by desc for start point to get the latest point
   )
   if startPoint  then
     puts "##########################################################"
