@@ -27,12 +27,14 @@ puts count
   ## on each of these endpoints get the previous 
   ## entry for the same uvid 
   ## this will be the start point
+  ## sort based on the timestamp desc
 	#puts " checking data for uvid :: #{endPoint["uvId"]} " 
   startPoint = @coll.find_one(
     {"uvId" => endPoint["uvId"],
       "junctionId"=> {"$ne" => endPoint["junctionId"]},
       "timestamp"=> {"$lt" => endPoint["timestamp"]},
-  }
+  },
+:sort => ['timestamp', Mongo::DESCENDING]
   )
   if startPoint  then
     puts "##########################################################"
